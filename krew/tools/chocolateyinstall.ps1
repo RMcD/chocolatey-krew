@@ -20,3 +20,4 @@ $packageArgs = @{
 }
 
 Install-ChocolateyPackage @packageArgs
+Install-ChocolateyPath -PathToInstall (Join-Path $env:USERPROFILE '\.krew\bin') -PathType User
