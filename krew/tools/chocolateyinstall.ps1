@@ -3,7 +3,14 @@ $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
 $configUrl  = 'https://github.com/kubernetes-sigs/krew/releases/download/v0.3.0/krew.yaml'
 $url        = 'https://github.com/kubernetes-sigs/krew/releases/download/v0.3.0/krew.exe'
 
-Get-ChocolateyWebFile -PackageName $env:ChocolateyPackageName -FileFullPath "$toolsDir\krew.yaml" -Url '$configUrl'
+#Pull this from Install-ChocolateyPackage.ps1 so that the config yaml can live next to the exe since it didn't like passing a full path.
+$chocTempDir = $env:TEMP
+$tempDir = Join-Path $chocTempDir "$($env:chocolateyPackageName)"
+if ($env:chocolateyPackageVersion -ne $null) { $tempDir = Join-Path $tempDir "$($env:chocolateyPackageVersion)"; }
+$tempDir = $tempDir -replace '\\chocolatey\\chocolatey\\', '\chocolatey\'
+if (![System.IO.Directory]::Exists($tempDir)) { [System.IO.Directory]::CreateDirectory($tempDir) | Out-Null }
+
+Get-ChocolateyWebFile -PackageName $env:ChocolateyPackageName -FileFullPath "$tempDir\krew.yaml" -Url $configUrl
 
 $packageArgs = @{
   packageName   = $env:ChocolateyPackageName
@@ -21,3 +28,4 @@ $packageArgs = @{
 
 Install-ChocolateyPackage @packageArgs
 Install-ChocolateyPath -PathToInstall (Join-Path $env:USERPROFILE '\.krew\bin') -PathType User
+refreshenv
